@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1150" height="700" viewBox="0 0 1150 700">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <style>
+      .actor { fill:#f8fafc; stroke:#334155; stroke-width:2; rx:10; }
+      .name { font:600 15px system-ui,sans-serif; fill:#0f172a; text-anchor:middle; }
+      .label { font:14px system-ui,sans-serif; fill:#334155; text-anchor:middle; }
+      .life { stroke:#94a3b8; stroke-width:1.5; stroke-dasharray:7 7; }
+      .call { stroke:#475569; stroke-width:2; marker-end:url(#arrow); }
+      .return { stroke:#0f766e; stroke-width:2; stroke-dasharray:6 4; marker-end:url(#arrow); }
+      .title { font:700 24px system-ui,sans-serif; fill:#0f172a; text-anchor:middle; }
+    </style>
+  </defs>
+  <rect width="1150" height="700" fill="white"/>
+  <text x="575" y="35" class="title">Score Update Flow</text>
+
+  <rect x="40" y="70" width="150" height="50" class="actor"/><text x="115" y="101" class="name">Browser</text>
+  <rect x="255" y="70" width="170" height="50" class="actor"/><text x="340" y="101" class="name">Action Endpoint</text>
+  <rect x="505" y="70" width="190" height="50" class="actor"/><text x="600" y="101" class="name">Scoreboard Module</text>
+  <rect x="775" y="70" width="150" height="50" class="actor"/><text x="850" y="101" class="name">PostgreSQL</text>
+  <rect x="980" y="70" width="130" height="50" class="actor"/><text x="1045" y="101" class="name">SSE Clients</text>
+
+  <line x1="115" y1="120" x2="115" y2="660" class="life"/>
+  <line x1="340" y1="120" x2="340" y2="660" class="life"/>
+  <line x1="600" y1="120" x2="600" y2="660" class="life"/>
+  <line x1="850" y1="120" x2="850" y2="660" class="life"/>
+  <line x1="1045" y1="120" x2="1045" y2="660" class="life"/>
+
+  <line x1="115" y1="165" x2="340" y2="165" class="call"/>
+  <text x="228" y="155" class="label">complete action request</text>
+
+  <line x1="340" y1="225" x2="600" y2="225" class="call"/>
+  <text x="470" y="215" class="label">validated userId + actionInstanceId</text>
+
+  <line x1="600" y1="285" x2="850" y2="285" class="call"/>
+  <text x="725" y="275" class="label">begin transaction</text>
+
+  <line x1="600" y1="345" x2="850" y2="345" class="call"/>
+  <text x="725" y="335" class="label">insert unique score event</text>
+
+  <line x1="600" y1="405" x2="850" y2="405" class="call"/>
+  <text x="725" y="395" class="label">upsert score total</text>
+
+  <line x1="600" y1="465" x2="850" y2="465" class="call"/>
+  <text x="725" y="455" class="label">commit</text>
+
+  <line x1="600" y1="525" x2="340" y2="525" class="return"/>
+  <text x="470" y="515" class="label">new score</text>
+
+  <line x1="340" y1="585" x2="115" y2="585" class="return"/>
+  <text x="228" y="575" class="label">success</text>
+
+  <line x1="600" y1="625" x2="1045" y2="625" class="return"/>
+  <text x="823" y="615" class="label">leaderboard.updated</text>
+</svg>

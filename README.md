@@ -6,6 +6,7 @@ TypeScript backend take-home assignment.
 
 - [`src/problem4`](src/problem4): three TypeScript implementations of `sum_to_n`, with complexity notes and tests.
 - [`src/problem5`](src/problem5): Express + TypeScript CRUD API backed by SQLite, with validation, filtering, repository-based persistence, and integration tests.
+- [`src/problem6`](src/problem6): implementation-ready architecture specification for a secure live top-10 scoreboard, with architecture and execution-flow diagrams.
 
 ## Requirements
 
@@ -17,8 +18,7 @@ TypeScript backend take-home assignment.
 ```bash
 npm install
 npm run build
-npm run test:problem4
-npm run test:problem5
+npm test
 ```
 
 ## Run Problem 5

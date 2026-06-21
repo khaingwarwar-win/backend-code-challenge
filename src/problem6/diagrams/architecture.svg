@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+    <style>
+      .box { fill:#f8fafc; stroke:#334155; stroke-width:2; rx:12; }
+      .db { fill:#ecfeff; stroke:#0e7490; stroke-width:2; rx:12; }
+      .text { font:600 17px system-ui,sans-serif; fill:#0f172a; text-anchor:middle; }
+      .small { font:13px system-ui,sans-serif; fill:#334155; text-anchor:middle; }
+      .line { stroke:#475569; stroke-width:2; fill:none; marker-end:url(#arrow); }
+      .title { font:700 24px system-ui,sans-serif; fill:#0f172a; text-anchor:middle; }
+    </style>
+  </defs>
+  <rect width="1100" height="520" fill="white"/>
+  <text x="550" y="38" class="title">Live Scoreboard Module</text>
+
+  <rect x="60" y="120" width="180" height="75" class="box"/>
+  <text x="150" y="152" class="text">Browser</text>
+  <text x="150" y="176" class="small">action, snapshot, SSE</text>
+
+  <rect x="340" y="90" width="220" height="75" class="box"/>
+  <text x="450" y="122" class="text">Action Endpoint</text>
+  <text x="450" y="146" class="small">validates completion</text>
+
+  <rect x="340" y="250" width="220" height="75" class="box"/>
+  <text x="450" y="282" class="text">Leaderboard API</text>
+  <text x="450" y="306" class="small">returns top 10</text>
+
+  <rect x="650" y="90" width="220" height="75" class="box"/>
+  <text x="760" y="122" class="text">Scoreboard Module</text>
+  <text x="760" y="146" class="small">score policy + replay check</text>
+
+  <rect x="650" y="250" width="220" height="95" class="db"/>
+  <text x="760" y="288" class="text">PostgreSQL</text>
+  <text x="760" y="312" class="small">scores + score_events</text>
+  <text x="760" y="332" class="small">source of truth</text>
+
+  <rect x="650" y="390" width="220" height="75" class="box"/>
+  <text x="760" y="422" class="text">SSE Stream</text>
+  <text x="760" y="446" class="small">broadcasts top 10</text>
+
+  <path d="M240 145 L340 125" class="line"/>
+  <path d="M560 125 L650 125" class="line"/>
+  <path d="M760 165 L760 250" class="line"/>
+  <path d="M240 175 C300 220,310 270,340 285" class="line"/>
+  <path d="M560 285 L650 285" class="line"/>
+  <path d="M760 345 L760 390" class="line"/>
+  <path d="M650 425 C430 430,260 300,180 195" class="line"/>
+</svg>
+

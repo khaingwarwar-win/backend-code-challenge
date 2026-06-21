@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant B as Browser
+    participant A as Action Endpoint
+    participant S as Scoreboard Module
+    participant D as PostgreSQL
+    participant L as SSE Clients
+
+    B->>A: Complete action request
+    A->>A: Validate JWT and action completion
+    A->>S: userId, actionType, actionInstanceId
+    S->>S: Derive score delta from server config
+    S->>D: BEGIN
+    S->>D: INSERT score_events (unique actionInstanceId)
+    alt duplicate action instance
+        D-->>S: unique constraint violation
+        S-->>A: 409 Conflict
+        A-->>B: 409 Conflict
+    else accepted
+        S->>D: UPSERT scores = scores + delta
+        S->>D: COMMIT
+        S-->>A: new score
+        A-->>B: success
+        S->>D: Query latest top 10
+        S-->>L: leaderboard.updated
+    end

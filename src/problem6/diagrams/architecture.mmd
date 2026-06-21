@@ -1,0 +1,16 @@
+flowchart LR
+    Browser[Browser]
+    Action[Action completion endpoint]
+    Scoreboard[Scoreboard module]
+    DB[(PostgreSQL)]
+    Leaderboard[Leaderboard API]
+    Stream[SSE stream]
+
+    Browser -->|"complete action"| Action
+    Action -->|"validated actionInstanceId"| Scoreboard
+    Scoreboard -->|"transaction: event + score"| DB
+    Browser -->|"GET /api/leaderboard"| Leaderboard
+    Leaderboard -->|"top 10 query"| DB
+    Browser -->|"GET /api/leaderboard/live"| Stream
+    Scoreboard -->|"after commit: broadcast top 10"| Stream
+
