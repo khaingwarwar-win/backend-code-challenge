@@ -14,17 +14,16 @@ export function sum_to_n_b(n: number): number {
   return (n * (n + 1)) / 2;
 }
 
+function sumRange(start: number, end: number): number {
+  if (start > end) return 0;
+  if (start === end) return start;
+
+  const mid = Math.floor((start + end) / 2);
+  return sumRange(start, mid) + sumRange(mid + 1, end);
+}
+
 export function sum_to_n_c(n: number): number {
   // Divide and conquer recursion: O(n) time, O(log n) stack depth
   if (n <= 0) return 0;
-
-  function sumRange(start: number, end: number): number {
-    if (start > end) return 0;
-    if (start === end) return start;
-
-    const mid = Math.floor((start + end) / 2);
-    return sumRange(start, mid) + sumRange(mid + 1, end);
-  }
-
   return sumRange(1, n);
 }

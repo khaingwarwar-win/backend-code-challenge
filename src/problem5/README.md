@@ -9,6 +9,17 @@ REST API built with Express 5 and TypeScript, backed by SQLite.
 - Vitest + Supertest for integration tests
 - Helmet + CORS middleware
 
+## Structure
+
+The API is split into small layers so the route code stays thin:
+
+- `config/` — database setup
+- `routes/` — HTTP routes
+- `services/` — application/business layer
+- `repositories/` — SQL persistence
+- `middlewares/` — validation, 404, and error handling
+- `utils/` — shared errors and helpers
+
 ## Running
 
 ```bash

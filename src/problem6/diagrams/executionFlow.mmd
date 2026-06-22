@@ -1,12 +1,16 @@
 sequenceDiagram
     participant B as Browser
+    participant Auth as Auth Middleware
     participant A as Action Endpoint
     participant S as Scoreboard Module
     participant D as PostgreSQL
+    participant R as Redis Cache
     participant L as SSE Clients
 
-    B->>A: Complete action request
-    A->>A: Validate JWT and action completion
+    B->>Auth: Complete action request with JWT
+    Auth->>Auth: Verify token, expiry, scopes
+    Auth->>A: Authenticated userId
+    A->>A: Validate action completion
     A->>S: userId, actionType, actionInstanceId
     S->>S: Derive score delta from server config
     S->>D: BEGIN
@@ -21,5 +25,6 @@ sequenceDiagram
         S-->>A: new score
         A-->>B: success
         S->>D: Query latest top 10
-        S-->>L: leaderboard.updated
+        S->>R: Refresh leaderboard:top10
+        S-->>L: leaderboard.updated from cache snapshot
     end

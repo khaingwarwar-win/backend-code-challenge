@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type Database from "better-sqlite3";
-import { NotFoundError } from "./errors.js";
 import type {
   CreateTaskInput,
   Task,
   TaskFilters,
   TaskStatus,
   UpdateTaskInput
-} from "./types.js";
+} from "../types.js";
+import { NotFoundError } from "../utils/errors.js";
 
 interface TaskRow {
   id: string;

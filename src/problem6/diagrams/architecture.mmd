@@ -1,16 +1,21 @@
 flowchart LR
     Browser[Browser]
+    Auth[Auth middleware]
     Action[Action completion endpoint]
     Scoreboard[Scoreboard module]
     DB[(PostgreSQL)]
+    Cache[(Redis top-10 cache)]
     Leaderboard[Leaderboard API]
     Stream[SSE stream]
 
     Browser -->|"complete action"| Action
+    Action -->|"JWT"| Auth
+    Auth -->|"verified userId"| Action
     Action -->|"validated actionInstanceId"| Scoreboard
     Scoreboard -->|"transaction: event + score"| DB
+    Scoreboard -->|"refresh after commit"| Cache
     Browser -->|"GET /api/leaderboard"| Leaderboard
-    Leaderboard -->|"top 10 query"| DB
+    Leaderboard -->|"read top 10"| Cache
+    Leaderboard -->|"cache miss fallback"| DB
     Browser -->|"GET /api/leaderboard/live"| Stream
-    Scoreboard -->|"after commit: broadcast top 10"| Stream
-
+    Scoreboard -->|"after cache refresh: broadcast top 10"| Stream

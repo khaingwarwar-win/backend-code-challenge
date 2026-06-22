@@ -22,13 +22,15 @@ The system needs to:
 
 The first version can live inside one backend application:
 
+- an auth middleware validates the user's access token before action completion;
 - an action endpoint validates that the user really completed the action;
 - a scoreboard module records score changes;
 - PostgreSQL stores scores and action history;
+- Redis caches the current top 10 leaderboard snapshot;
 - a leaderboard endpoint returns the current top 10; and
 - an SSE endpoint pushes live leaderboard updates.
 
-No Redis or message queue is required for the first version. The database is enough until read volume or broadcast volume becomes a real problem.
+PostgreSQL remains the source of truth. Redis is a derived cache for the public top-10 list because every user reads the same leaderboard until a score update changes it.
 
 ## Data model
 
@@ -69,6 +71,29 @@ ON score_events (user_id, action_instance_id);
 ```
 
 This is the main replay protection. If the same completed action is submitted twice, the second insert fails and the score is not incremented again.
+
+## Auth module
+
+The auth module is responsible for identifying the user before any action can award points.
+
+Recommended first version:
+
+- Browser sends a JWT access token in `Authorization: Bearer <token>`.
+- Auth middleware verifies token signature, issuer, audience, expiry, and required scopes.
+- Middleware stores `userId` and scopes in the request context.
+- Action-completion handlers use the authenticated `userId`; they do not accept `userId` from the browser body.
+- Internal score update calls are protected separately with service-to-service credentials or by keeping the module in-process.
+
+Example request context after auth:
+
+```ts
+{
+  userId: "4c996760-91d1-4f15-80e6-1191d68fdb8f",
+  scopes: ["action:complete"]
+}
+```
+
+This keeps authorization close to the HTTP boundary and avoids trusting client-supplied identity.
 
 ## API
 
@@ -132,6 +157,15 @@ Ordering:
 1. score descending;
 2. `user_id` ascending to keep ties deterministic.
 
+Read behavior:
+
+1. Try `leaderboard:top10` from Redis.
+2. If cache exists, return it.
+3. If cache is missing, query PostgreSQL, write the Redis cache, then return the result.
+4. After every accepted score update, refresh the Redis top-10 cache before broadcasting.
+
+Use a short TTL as a safety net, for example 30–60 seconds, but rely mainly on explicit cache refresh after writes.
+
 ### Live leaderboard stream
 
 `GET /api/leaderboard/live`
@@ -169,12 +203,14 @@ The server should also send a heartbeat every 15–30 seconds and remove the con
    - upsert into `scores` and add the delta.
 8. If the insert conflicts on `(user_id, action_instance_id)`, roll back and return `409`.
 9. Commit the transaction.
-10. Fetch the latest top 10 and broadcast it to SSE clients.
+10. Rebuild the top-10 leaderboard from PostgreSQL and update Redis.
+11. Broadcast the cached top-10 snapshot to SSE clients.
 
 ## Security notes
 
 - Do not expose score increment as a public API.
 - Do not accept `delta` from the client.
+- Do not accept `userId` from the client for score writes; derive it from verified auth context.
 - Keep score policy on the server.
 - Use a unique `actionInstanceId` for every completed action.
 - Enforce replay protection with a database unique constraint.
@@ -191,9 +227,9 @@ Some actions should be one-time only. Others should be repeatable, such as one l
 
 The simple version sends a fresh snapshot when the browser reconnects. If exact replay becomes important, add a monotonically increasing event ID and use `Last-Event-ID`.
 
-### Cache later, not first
+### Cache invalidation
 
-PostgreSQL is enough for the first implementation. If the leaderboard becomes read-heavy, add Redis as a derived cache of the top scores. PostgreSQL should remain the source of truth.
+The top-10 cache should be refreshed only after the database transaction commits. If Redis is temporarily unavailable, the API can fall back to PostgreSQL and log the cache failure. The cache must never become the source of truth.
 
 ### Admin reversal
 
